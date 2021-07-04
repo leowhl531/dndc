@@ -9,9 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.datatransfer.DataFlavor;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
+
 public class ItemController {
 
     private ItemService itemService;
@@ -23,10 +26,12 @@ public class ItemController {
 
     @PostMapping("/donor/new_item")
     public ResponseEntity createItem(@ModelAttribute Item item, @RequestParam("image") MultipartFile image) throws Exception{
-        //test if param is working, TODO delete
-        if(image != null){
-            item.setImageUrl("https://img.discogs.com/6lJcw-8uxGj7qcg8xzLUWvWLOKE=/578x789/smart/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/A-15885-1586013096-1429.jpeg.jpg");
+        try {
+            item.setImageUrl(itemService.saveImage(image));
+        }catch (Exception e){
+            throw new IllegalStateException("fail to upload image");
         }
+
         return new ResponseEntity(itemService.createItem(item), HttpStatus.CREATED);
     }
 

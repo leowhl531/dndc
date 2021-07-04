@@ -1,7 +1,11 @@
 package dndc.Entity;
 
+import com.sun.javafx.beans.IDProperty;
 import lombok.Data;
+
 import org.elasticsearch.common.geo.GeoPoint;
+
+import javax.annotation.Generated;
 
 @Data
 public class Item {
