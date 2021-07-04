@@ -36,11 +36,14 @@ public class ItemService {
     }
 
     public String createItem(Item item) throws Exception{
+        //test search item by resident id, TODO delete
+        item.setItemID("18701797671");
+
+
         Map<String, Object> itemMapper = objectMapper.convertValue(item, Map.class);
 
         IndexRequest indexRequest = new IndexRequest(INDEX, TYPE, item.getItemID())
                 .source(itemMapper,  XContentType.JSON);
-        System.out.println("Successfully built request.");
         IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
 
         return indexResponse
