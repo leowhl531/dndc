@@ -66,7 +66,7 @@ public class ItemService {
                 .name();
     }
 
-
+    //TEST
     public Item findById(String id) throws Exception{
         GetRequest getRequest = new GetRequest(INDEX, TYPE, id);
 
