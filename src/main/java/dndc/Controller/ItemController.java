@@ -42,16 +42,16 @@ public class ItemController {
         return new ResponseEntity(itemService.createItem(item), HttpStatus.CREATED);
     }
 
-    @PostMapping("/donor/delete_item")
-    public ResponseEntity deleteItem(){
-        //TODO
-        return null;
+    @PostMapping("/donor/delete_item/{itemID}")
+    public ResponseEntity deleteItem(@PathVariable(value = "itemID") String itemID) throws Exception{
+        System.out.println(itemID);
+        return new ResponseEntity(itemService.deleteById(itemID), HttpStatus.OK);
     }
 
     @GetMapping("/donor/my_item")
-    public Item findById() throws Exception{
+    public List<Item> findById() throws Exception{
         //hard code for test, TODO delete
-        return itemService.findById("18701797671");
+        return itemService.findById("554455");
     }
 
     @GetMapping("/ngo/search_item")

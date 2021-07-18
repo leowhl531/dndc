@@ -12,10 +12,22 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.index.reindex.DeleteByQueryRequestBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +37,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 import static dndc.Util.Constant.INDEX;
@@ -49,7 +62,7 @@ public class ItemService {
         this.objectMapper = objectMapper;
         this.amazonS3 = amazonS3;
     }
-
+    //POST ITEM
     public String createItem(Item item) throws Exception{
 
         UUID uuid = UUID.randomUUID();
@@ -66,14 +79,51 @@ public class ItemService {
                 .name();
     }
 
-    //TEST
-    public Item findById(String id) throws Exception{
-        GetRequest getRequest = new GetRequest(INDEX, TYPE, id);
+    //GET ITEMS
+    public List<Item> findById(String residentID) throws Exception{
 
-        GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
-        Map<String, Object> resultMap = getResponse.getSource();
-        return convertMapToItem(resultMap);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(QueryBuilders.matchQuery("residentID", residentID));
+        sourceBuilder.from(0);
+        sourceBuilder.size(25);
+        sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
+
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("item");
+        searchRequest.source(sourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        List<Item> itemList = new ArrayList<>();
+
+        for(SearchHit hit : searchHits){
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            itemList.add(convertMapToItem(sourceAsMap));
+        }
+
+        return itemList;
     }
+
+    //DELETE ITEM
+    public boolean deleteById(String itemID) throws IOException{
+
+
+        DeleteByQueryRequest deleteRequest = new DeleteByQueryRequest(INDEX);
+        // query condition
+        deleteRequest.setQuery(QueryBuilders.matchQuery("itemID", itemID));
+        // execution
+        BulkByScrollResponse bulkResponse = client.deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
+        System.out.println(bulkResponse);
+        long deletedDocs = bulkResponse.getDeleted();
+        if (deletedDocs > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 
 
     public String saveImage(MultipartFile image) throws Exception{

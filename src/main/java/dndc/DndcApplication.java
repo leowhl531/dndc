@@ -26,7 +26,7 @@ public class DndcApplication {
         XContentBuilder itemBuilder = XContentFactory.jsonBuilder();
         itemBuilder.startObject();
         {
-            itemBuilder.field("ItemID", "keyword").field("index", "true");
+            itemBuilder.field("itemID", "keyword").field("index", "true");
             itemBuilder.field("name", "string");
             itemBuilder.field("residentID", "keyword");
             itemBuilder.field("description", "string");
