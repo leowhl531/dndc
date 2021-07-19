@@ -52,7 +52,8 @@ public class DndcApplication {
         {
             scheduleBuilder.field("scheduleID", "keyword");
             scheduleBuilder.field("NGOID", "keyword");
-            scheduleBuilder.field("ITEM_ID[]", new ArrayList<String>());
+            scheduleBuilder.field("itemIDs", new ArrayList<>());
+            scheduleBuilder.field("itemList", new ArrayList<>());
             scheduleBuilder.field("scheduleTime", "string");
             scheduleBuilder.field("status", 0);
         }

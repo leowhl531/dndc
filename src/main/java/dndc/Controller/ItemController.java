@@ -53,7 +53,7 @@ public class ItemController {
     @GetMapping("/donor/my_item")
     public List<Item> findById() throws Exception{
         //hard code for test, TODO delete
-        return itemService.findById("554455");
+        return itemService.findByUserId("554455");
     }
 
     @GetMapping("/ngo/search_item")
