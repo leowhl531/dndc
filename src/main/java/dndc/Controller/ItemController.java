@@ -5,6 +5,7 @@ import dndc.Entity.AddressFormatter;
 import dndc.Entity.Item;
 import dndc.Service.ItemService;
 import org.apache.tomcat.jni.Address;
+import org.elasticsearch.common.geo.GeoPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.datatransfer.DataFlavor;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -55,8 +57,7 @@ public class ItemController {
     }
 
     @GetMapping("/ngo/search_item")
-    public List<Item> searchItem(){
-        //TODO
-        return null;
+    public List<Item> searchItem() throws IOException {
+        return itemService.searchByGeo(new GeoPoint(33.9474144,-117.6889273 ));
     }
 }

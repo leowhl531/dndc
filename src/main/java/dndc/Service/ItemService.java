@@ -17,8 +17,11 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.GeoDistanceQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
@@ -173,5 +176,31 @@ public class ItemService {
     private void uploadFileTos3bucket(String fileName, File file) {
         amazonS3.putObject(new PutObjectRequest("dndcimage", fileName, file)
                 .withCannedAcl(CannedAccessControlList.PublicRead));
+    }
+
+    public List<Item> searchByGeo(GeoPoint geoPoint) throws IOException {
+        GeoDistanceQueryBuilder qb = QueryBuilders.geoDistanceQuery("location")
+                .point(geoPoint.getLat(), geoPoint.getLon())
+                .distance(10, DistanceUnit.KILOMETERS);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(qb);
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("item");
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        // Get access to the returned documents
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        // System.out.println(searchHits.length);
+        List<Item> itemList = new ArrayList<>();
+
+        for(SearchHit hit : searchHits){
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            itemList.add(convertMapToItem(sourceAsMap));
+        }
+
+        return itemList;
+
     }
 }
