@@ -1,15 +1,14 @@
 package dndc.Controller;
 
+import com.amazonaws.services.xray.model.Http;
 import dndc.Entity.Schedule;
 import dndc.Service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -24,10 +23,9 @@ public class ScheduleController {
         this.scheduleService = scheduleService;
     }
 
-    @PostMapping("/ngo/complete_schedule")
-    public boolean completeSchedule(){
-        //TODO
-        return true;
+    @PostMapping("/ngo/complete_schedule/{scheduleID}")
+    public ResponseEntity completeSchedule(@PathVariable String scheduleID) throws IOException {
+        return new ResponseEntity(scheduleService.markComplete(scheduleID), HttpStatus.OK);
     }
 
     @PostMapping("/ngo/new_schedule")

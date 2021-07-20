@@ -11,7 +11,7 @@ public class Schedule {
     private String NGOID;
     private String scheduleTime;
     private List<String> itemIDs;
-    private int status;  // 0 for pending, 1 for scheduled, 2 for picked-up
+    private int status;  // 0 for scheduled, 1 for picked up
     private List<Item> itemList; // optional for My_schedule
     private String NGOUsername;
 }

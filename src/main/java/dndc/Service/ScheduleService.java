@@ -9,10 +9,16 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,27 +36,35 @@ public class ScheduleService {
         this.objectMapper = objectMapper;
         this.itemService = itemService;
     }
-
+    //post schedule
     public String createSchedule(Schedule schedule) throws Exception {
 
         UUID uuid = UUID.randomUUID();
         schedule.setScheduleID(uuid.toString());
 
         List<String> exist = new ArrayList<>();
-        List<Item> itemList = new ArrayList<>();
-        List<String> notFound = new ArrayList<>();
 
+        //check item's eligibility
         for(String itemId : schedule.getItemIDs()){
             Item cur = itemService.findById(itemId);
-            if(cur != null){
-                itemList.add(cur);
-                exist.add(itemId);
+            if(cur == null){
+                System.out.println("item " + cur.getName() + " not found");
+            }else if(cur.getStatus() == 1){
+                System.out.println("item " + cur.getName() + " already been schedule");
+            }else if(cur.getStatus() == 2){
+                System.out.println("item " + cur.getName() + " already been picked up");
             }else{
-                notFound.add(itemId);
+                exist.add(itemId);
             }
         }
-        schedule.setItemList(itemList);
+        if(exist.isEmpty()){
+            return "No item has been selected.";
+        }
         schedule.setItemIDs(exist);
+        schedule.setNGOID("89757");
+        schedule.setNGOUsername("GOOD WILL");
+
+        //update item status & schedule info
         itemService.updateItems(exist, schedule.getScheduleID(), schedule.getScheduleTime(), schedule.getNGOID(), 1);
         // Creates Schedule Index
         XContentBuilder scheduleBuilder = XContentFactory.jsonBuilder();
@@ -59,7 +73,6 @@ public class ScheduleService {
             scheduleBuilder.field("scheduleID", schedule.getScheduleID());
             scheduleBuilder.field("NGOID", schedule.getNGOID());
             scheduleBuilder.field("itemIDs", schedule.getItemIDs());
-//            scheduleBuilder.field("itemList", schedule.getItemList());
             scheduleBuilder.field("scheduleTime", schedule.getScheduleTime());
             scheduleBuilder.field("status", schedule.getStatus());
             scheduleBuilder.field("NGOUsername", schedule.getNGOUsername());
@@ -72,5 +85,28 @@ public class ScheduleService {
 
         return response.getResult().name();
 
+    }
+
+    //mark schedule complete
+    public boolean markComplete(String scheduleID) throws IOException {
+        return markCompleteAction(scheduleID, "item", 2) && markCompleteAction(scheduleID, "schedule", 1);
+
+    }
+
+
+    private boolean markCompleteAction(String id, String index, int status) throws IOException {
+        // update request
+        UpdateByQueryRequest updateRequest = new UpdateByQueryRequest(index);
+        // search query
+        String queryString = "if (ctx._source.scheduleID == '" + id + "') {ctx._source.status=" + status + "}";
+        updateRequest.setScript(new Script(ScriptType.INLINE, "painless", queryString, Collections.emptyMap()));
+        // execution
+        BulkByScrollResponse bulkResponse = client.updateByQuery(updateRequest, RequestOptions.DEFAULT);
+        long updatedDocs = bulkResponse.getUpdated();
+        if (updatedDocs > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
