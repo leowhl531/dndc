@@ -19,7 +19,7 @@ public class Item {
     private GeoPoint location;
     private String postTime;
 
-    private String NGOID;
+    private String ngoID;
     private String scheduleID;
     private String scheduleTime;
     private int status;  // 0 for pending, 1 for scheduled, 2 for picked-up

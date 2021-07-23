@@ -36,9 +36,9 @@ public class ScheduleController {
 
 
     @GetMapping("/ngo/my_schedule")
-    public List<Schedule> mySchedule(){
-        //TODO
-        return null;
+    public List<Schedule> mySchedule() throws Exception {
+        //Hard code for search,  TODO delete
+        return scheduleService.getMySchedule("89757");
     }
 
 

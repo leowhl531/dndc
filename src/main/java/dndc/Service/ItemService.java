@@ -83,7 +83,7 @@ public class ItemService {
             builder.field("address", item.getAddress());
             builder.field("location", item.getLocation());
             builder.field("postTime", item.getPostTime());
-            builder.field("NGOID", item.getNGOID());
+            builder.field("ngoID", item.getNgoID());
             builder.field("scheduleID", item.getScheduleID());
             builder.field("scheduleTime", item.getScheduleTime());
             builder.field("status", item.getStatus());
@@ -124,6 +124,7 @@ public class ItemService {
 
     //GET ITEMS BY GEO
     public List<Item> searchByGeo(GeoPoint geoPoint) throws IOException {
+        //TODO   only search status with 0
         GeoDistanceQueryBuilder qb = QueryBuilders.geoDistanceQuery("location")
                 .point(geoPoint.getLat(), geoPoint.getLon())
                 .distance(10, DistanceUnit.KILOMETERS);
