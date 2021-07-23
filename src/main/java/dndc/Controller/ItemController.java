@@ -5,6 +5,7 @@ import dndc.Entity.AddressFormatter;
 import dndc.Entity.Item;
 import dndc.Service.ItemService;
 import org.apache.tomcat.jni.Address;
+import org.elasticsearch.common.geo.GeoPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.datatransfer.DataFlavor;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -42,21 +44,20 @@ public class ItemController {
         return new ResponseEntity(itemService.createItem(item), HttpStatus.CREATED);
     }
 
-    @PostMapping("/donor/delete_item")
-    public ResponseEntity deleteItem(){
-        //TODO
-        return null;
+    @PostMapping("/donor/delete_item/{itemID}")
+    public ResponseEntity deleteItem(@PathVariable(value = "itemID") String itemID) throws Exception{
+        System.out.println(itemID);
+        return new ResponseEntity(itemService.deleteById(itemID), HttpStatus.OK);
     }
 
     @GetMapping("/donor/my_item")
-    public Item findById() throws Exception{
+    public List<Item> findById() throws Exception{
         //hard code for test, TODO delete
-        return itemService.findById("18701797671");
+        return itemService.findByUserId("554455");
     }
 
     @GetMapping("/ngo/search_item")
-    public List<Item> searchItem(){
-        //TODO
-        return null;
+    public List<Item> searchItem() throws IOException {
+        return itemService.searchByGeo(new GeoPoint(33.9474144,-117.6889273 ));
     }
 }

@@ -7,6 +7,8 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.mapper.AbstractPointGeometryFieldMapper;
+import org.elasticsearch.index.mapper.GeoPointFieldMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,14 +28,14 @@ public class DndcApplication {
         XContentBuilder itemBuilder = XContentFactory.jsonBuilder();
         itemBuilder.startObject();
         {
-            itemBuilder.field("ItemID", "keyword").field("index", "true");
+            itemBuilder.field("itemID", "keyword").field("index", "true");
             itemBuilder.field("name", "string");
             itemBuilder.field("residentID", "keyword");
             itemBuilder.field("description", "string");
             itemBuilder.field("imageUrl", "string");
             itemBuilder.field("address", "string");
             itemBuilder.field("location", new GeoPoint());
-            itemBuilder.field("NGOID", "keyword");
+            itemBuilder.field("ngoID", "keyword");
             itemBuilder.field("scheduleID", "keyword");
             itemBuilder.field("scheduleTime", "string");
             itemBuilder.field("status", 0);
@@ -51,8 +53,9 @@ public class DndcApplication {
         scheduleBuilder.startObject();
         {
             scheduleBuilder.field("scheduleID", "keyword");
-            scheduleBuilder.field("NGOID", "keyword");
-            scheduleBuilder.field("ITEM_ID[]", new ArrayList<String>());
+            scheduleBuilder.field("ngoID", "keyword");
+            scheduleBuilder.field("itemIDs", new ArrayList<>());
+            scheduleBuilder.field("itemList", new ArrayList<>());
             scheduleBuilder.field("scheduleTime", "string");
             scheduleBuilder.field("status", 0);
         }
